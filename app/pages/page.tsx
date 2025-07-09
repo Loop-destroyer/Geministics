@@ -3,12 +3,15 @@
 import Link from "next/link"
 import { Footer } from "@/components/footer"
 import { ContentBlock } from "@/components/content-block"
+import { ContentModal } from "@/components/content-modal"
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
-import { contentStore } from "@/lib/content-store"
+import { contentStore, type ContentItem } from "@/lib/content-store"
 
 export default function PagesPage() {
-  const [pages, setPages] = useState<any[]>([])
+  const [pages, setPages] = useState<ContentItem[]>([])
+  const [selectedPage, setSelectedPage] = useState<ContentItem | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const unsubscribe = contentStore.subscribe(() => {
@@ -17,6 +20,16 @@ export default function PagesPage() {
     setPages(contentStore.getByType("page"))
     return unsubscribe
   }, [])
+
+  const handlePageClick = (page: ContentItem) => {
+    setSelectedPage(page)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setTimeout(() => setSelectedPage(null), 300) // Delay to allow exit animation
+  }
 
   return (
     <div className="min-h-screen bg-slate-800 relative overflow-hidden">
@@ -70,7 +83,13 @@ export default function PagesPage() {
           {pages.length > 0 ? (
             <div className="max-w-4xl mx-auto space-y-16">
               {pages.map((page, index) => (
-                <ContentBlock key={page.id} item={page} index={index} showTitle={false} />
+                <ContentBlock
+                  key={page.id}
+                  item={page}
+                  index={index}
+                  showTitle={false}
+                  onClick={() => handlePageClick(page)}
+                />
               ))}
             </div>
           ) : (
@@ -94,6 +113,9 @@ export default function PagesPage() {
 
         <Footer />
       </div>
+
+      {/* Modal */}
+      <ContentModal item={selectedPage} isOpen={isModalOpen} onClose={handleCloseModal} />
     </div>
   )
 }

@@ -3,12 +3,15 @@
 import Link from "next/link"
 import { Footer } from "@/components/footer"
 import { ContentBlock } from "@/components/content-block"
+import { ContentModal } from "@/components/content-modal"
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
-import { contentStore } from "@/lib/content-store"
+import { contentStore, type ContentItem } from "@/lib/content-store"
 
 export default function ThoughtsPage() {
-  const [thoughts, setThoughts] = useState<any[]>([])
+  const [thoughts, setThoughts] = useState<ContentItem[]>([])
+  const [selectedThought, setSelectedThought] = useState<ContentItem | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const unsubscribe = contentStore.subscribe(() => {
@@ -17,6 +20,16 @@ export default function ThoughtsPage() {
     setThoughts(contentStore.getByType("thought"))
     return unsubscribe
   }, [])
+
+  const handleThoughtClick = (thought: ContentItem) => {
+    setSelectedThought(thought)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setTimeout(() => setSelectedThought(null), 300) // Delay to allow exit animation
+  }
 
   return (
     <div className="min-h-screen bg-[#1a0933] relative overflow-hidden">
@@ -74,13 +87,22 @@ export default function ThoughtsPage() {
           {/* Thoughts */}
           <div className="max-w-4xl mx-auto space-y-16">
             {thoughts.map((thought, index) => (
-              <ContentBlock key={thought.id} item={thought} index={index} showTitle={false} />
+              <ContentBlock
+                key={thought.id}
+                item={thought}
+                index={index}
+                showTitle={false}
+                onClick={() => handleThoughtClick(thought)}
+              />
             ))}
           </div>
         </main>
 
         <Footer />
       </div>
+
+      {/* Modal */}
+      <ContentModal item={selectedThought} isOpen={isModalOpen} onClose={handleCloseModal} />
     </div>
   )
 }

@@ -3,12 +3,15 @@
 import Link from "next/link"
 import { Footer } from "@/components/footer"
 import { ContentBlock } from "@/components/content-block"
+import { ContentModal } from "@/components/content-modal"
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
-import { contentStore } from "@/lib/content-store"
+import { contentStore, type ContentItem } from "@/lib/content-store"
 
 export default function PoemsPage() {
-  const [poems, setPoems] = useState<any[]>([])
+  const [poems, setPoems] = useState<ContentItem[]>([])
+  const [selectedPoem, setSelectedPoem] = useState<ContentItem | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const unsubscribe = contentStore.subscribe(() => {
@@ -17,6 +20,16 @@ export default function PoemsPage() {
     setPoems(contentStore.getByType("poem"))
     return unsubscribe
   }, [])
+
+  const handlePoemClick = (poem: ContentItem) => {
+    setSelectedPoem(poem)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setTimeout(() => setSelectedPoem(null), 300) // Delay to allow exit animation
+  }
 
   return (
     <div className="min-h-screen bg-[#1a0933] relative overflow-hidden">
@@ -74,13 +87,22 @@ export default function PoemsPage() {
           {/* Poems */}
           <div className="space-y-16">
             {poems.map((poem, index) => (
-              <ContentBlock key={poem.id} item={poem} index={index} showTitle={true} />
+              <ContentBlock
+                key={poem.id}
+                item={poem}
+                index={index}
+                showTitle={true}
+                onClick={() => handlePoemClick(poem)}
+              />
             ))}
           </div>
         </main>
 
         <Footer />
       </div>
+
+      {/* Modal */}
+      <ContentModal item={selectedPoem} isOpen={isModalOpen} onClose={handleCloseModal} />
     </div>
   )
 }

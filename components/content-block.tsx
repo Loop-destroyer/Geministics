@@ -8,9 +8,10 @@ interface ContentBlockProps {
   item: ContentItem
   index: number
   showTitle?: boolean
+  onClick?: () => void
 }
 
-export function ContentBlock({ item, index, showTitle = true }: ContentBlockProps) {
+export function ContentBlock({ item, index, showTitle = true, onClick }: ContentBlockProps) {
   return (
     <motion.div
       className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start"
@@ -31,27 +32,55 @@ export function ContentBlock({ item, index, showTitle = true }: ContentBlockProp
       {/* Content Section */}
       <div className={showTitle ? "lg:col-span-2" : "lg:col-span-3"}>
         <motion.div
-          className="bg-black/30 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden"
+          className="bg-black/30 backdrop-blur-sm rounded-lg border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden cursor-pointer group"
           whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          onClick={onClick}
         >
+          {/* Click indicator */}
+          <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="bg-white/10 backdrop-blur-sm rounded-full p-2">
+              <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                />
+              </svg>
+            </div>
+          </div>
+
           {/* Image Section */}
-          {item.image ? (
+          {item.image && item.image.trim() !== "" ? (
             <div className="relative h-48 sm:h-56 lg:h-64 w-full">
               <Image
                 src={item.image || "/placeholder.svg"}
                 alt={item.title}
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                onError={(e) => {
+                  // Hide image if it fails to load
+                  e.currentTarget.style.display = "none"
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+              {/* Overlay content indicator */}
+              <div className="absolute bottom-4 left-4 right-4">
+                <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2">
+                  <p className="text-white/90 text-sm font-medium capitalize">{item.type}</p>
+                  <p className="text-white/70 text-xs">{new Date(item.date).toLocaleDateString()}</p>
+                </div>
+              </div>
             </div>
           ) : (
             // Placeholder when no image
-            <div className="h-48 sm:h-56 lg:h-64 w-full bg-gradient-to-br from-purple-900/30 via-pink-900/20 to-purple-800/30 flex items-center justify-center">
+            <div className="h-48 sm:h-56 lg:h-64 w-full bg-gradient-to-br from-purple-900/30 via-pink-900/20 to-purple-800/30 flex items-center justify-center group-hover:from-purple-900/40 group-hover:via-pink-900/30 group-hover:to-purple-800/40 transition-all duration-300">
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300">
                   {item.type === "poem" && (
                     <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
@@ -83,14 +112,14 @@ export function ContentBlock({ item, index, showTitle = true }: ContentBlockProp
                     </svg>
                   )}
                 </div>
-                <p className="text-white/40 text-sm font-light">
+                <p className="text-white/40 text-sm font-light group-hover:text-white/60 transition-colors duration-300">
                   {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                 </p>
               </div>
             </div>
           )}
 
-          {/* Text Content */}
+          {/* Text Content Preview */}
           <div className="p-6 lg:p-8">
             {!showTitle && (
               <div className="mb-6">
@@ -100,8 +129,16 @@ export function ContentBlock({ item, index, showTitle = true }: ContentBlockProp
                 <p className="text-white/60 text-sm">{new Date(item.date).toLocaleDateString()}</p>
               </div>
             )}
-            <div className="text-white/90 text-base lg:text-lg leading-relaxed font-crimson whitespace-pre-line">
-              {item.content}
+            <div className="text-white/90 text-base lg:text-lg leading-relaxed font-crimson">
+              {/* Show preview of content */}
+              <div className="line-clamp-4 group-hover:text-white transition-colors duration-300">
+                {item.content.length > 200 ? `${item.content.substring(0, 200)}...` : item.content}
+              </div>
+              {item.content.length > 200 && (
+                <div className="mt-4 text-purple-400 text-sm font-medium group-hover:text-purple-300 transition-colors duration-300">
+                  Click to read more →
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
