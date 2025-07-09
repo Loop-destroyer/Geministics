@@ -1,6 +1,5 @@
-import type { Config } from "tailwindcss"
-
-const config = {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -89,14 +88,45 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        float: {
+          "0%": {
+            transform: "translateY(0px)",
+          },
+          "50%": {
+            transform: "translateY(-20px)",
+          },
+          "100%": {
+            transform: "translateY(0px)",
+          },
+        },
+        "float-delay": {
+          "0%": {
+            transform: "translateY(-10px)",
+          },
+          "50%": {
+            transform: "translateY(10px)",
+          },
+          "100%": {
+            transform: "translateY(-10px)",
+          },
+        },
+        "pulse-slow": {
+          "0%, 100%": {
+            opacity: "0.4",
+          },
+          "50%": {
+            opacity: "0.6",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        float: "float 8s ease-in-out infinite",
+        "float-delay": "float-delay 10s ease-in-out infinite",
+        "pulse-slow": "pulse-slow 6s ease-in-out infinite",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
-
-export default config
+}
