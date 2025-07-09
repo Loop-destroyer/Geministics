@@ -50,8 +50,8 @@ Sent from Geministics Website Feedback Form
     // Log the feedback for manual processing
     console.log("📧 Feedback logged for manual processing:")
     console.log("To: Kaustubhmishra05@yahoo.com")
-    console.log("From:", request.body.userEmail || "Anonymous")
-    console.log("Message:", request.body.feedback)
+    console.log("From:", request.body?.userEmail || "Anonymous")
+    console.log("Message:", request.body?.feedback)
 
     return NextResponse.json({
       success: true, // Return success so user doesn't see error
